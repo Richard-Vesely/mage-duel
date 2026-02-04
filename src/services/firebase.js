@@ -56,7 +56,8 @@ export function init(config, state, callbacks = {}) {
   })
 }
 
-export async function ensureRoom(roomId, playerName, mode, state, visibility = 'public') {
+export async function ensureRoom(roomId, playerName, mode, state, visibility = 'public', options = {}) {
+  const { onJoined, onError } = options
   const code = roomId.toLowerCase()
   const roomRef = ref(db, `rooms/${code}`)
   state.roomId = code
@@ -93,48 +94,63 @@ export async function ensureRoom(roomId, playerName, mode, state, visibility = '
     state.spectatorRef = null
   }
 
-  // STEP 2: Try to set creation-only fields (hostUid, visibility, createdAt)
-  // These will fail silently if the room already exists (rules deny overwrite)
-  try {
-    await set(ref(db, `rooms/${code}/hostUid`), uid)
-  } catch (e) {
-    // hostUid already set by another user, that's fine
-  }
-  
-  try {
-    await set(ref(db, `rooms/${code}/visibility`), visibility)
-  } catch (e) {
-    // visibility already set, that's fine
-  }
-  
-  try {
-    await set(ref(db, `rooms/${code}/createdAt`), serverTimestamp())
-  } catch (e) {
-    // createdAt already set, that's fine
-  }
-
-  // STEP 3: Now we're a participant, we can read the room
-  // Update status and updatedAt (these are always allowed for participants)
-  const roomSnapshot = await get(roomRef)
-  const existingRoom = roomSnapshot.val()
-  
-  await update(roomRef, {
-    status: existingRoom?.status || 'lobby',
-    updatedAt: Date.now(),
-  })
-
-  // STEP 4: Update public index if room is public
-  const roomVisibility = existingRoom?.visibility || visibility
-  if (roomVisibility === 'public') {
-    await syncPublicRoomIndex(code)
-  }
-
   state.presenceInterval = window.setInterval(() => {
     if (state.playerRef) update(state.playerRef, { lastSeen: Date.now() })
     if (state.spectatorRef) update(state.spectatorRef, { lastSeen: Date.now() })
   }, 4000)
-
   window.location.hash = code
+
+  if (onJoined) onJoined(state)
+
+  try {
+    // STEP 2: Try to set creation-only fields (hostUid, visibility, createdAt)
+    // These will fail silently if the room already exists (rules deny overwrite)
+    try {
+      await set(ref(db, `rooms/${code}/hostUid`), uid)
+    } catch (e) {
+      // hostUid already set by another user, that's fine
+    }
+
+    try {
+      await set(ref(db, `rooms/${code}/visibility`), visibility)
+    } catch (e) {
+      // visibility already set, that's fine
+    }
+
+    try {
+      await set(ref(db, `rooms/${code}/createdAt`), serverTimestamp())
+    } catch (e) {
+      // createdAt already set, that's fine
+    }
+
+    // STEP 3: Now we're a participant, we can read the room.
+    // Only the host can write host-only fields (like `status`), but participants
+    // can always write `updatedAt`.
+    const roomSnapshot = await get(roomRef)
+    const existingRoom = roomSnapshot.val() || {}
+
+    const hostUid = existingRoom.hostUid || null
+    const isHost = hostUid ? hostUid === uid : true
+
+    const roomUpdates = { updatedAt: Date.now() }
+    if (!existingRoom.status && isHost) {
+      roomUpdates.status = 'lobby'
+    }
+    await update(roomRef, roomUpdates)
+
+    // STEP 4: Update public index if room is public (best effort; never fail join)
+    const roomVisibility = existingRoom.visibility || visibility
+    if (roomVisibility === 'public') {
+      try {
+        await syncPublicRoomIndex(code)
+      } catch (e) {
+        console.warn('Could not sync public room index (non-fatal):', e)
+      }
+    }
+  } catch (err) {
+    if (onError) onError(err)
+    throw err
+  }
 }
 
 export function subscribeRoom(roomId, callback) {

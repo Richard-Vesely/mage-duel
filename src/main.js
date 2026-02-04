@@ -36,13 +36,19 @@ function allocationFromDom(domRef) {
 function handleJoinOrSpectate(code, mode, visibility = 'public') {
   const name = dom.playerName.value.trim() || 'Arcane Mage'
   firebase
-    .ensureRoom(code, name, mode, state, visibility)
-    .then(() => {
-      showGame(true, dom)
-      firebase.subscribeRoom(state.roomId, (data) => {
-        state.roomState = data
-        renderRoom(state.roomState, state, dom, constants)
-      })
+    .ensureRoom(code, name, mode, state, visibility, {
+      onJoined() {
+        showGame(true, dom)
+        firebase.subscribeRoom(state.roomId, (data) => {
+          state.roomState = data
+          renderRoom(state.roomState, state, dom, constants)
+        })
+      },
+    })
+    .catch((err) => {
+      console.error('Could not fully join room:', err)
+      alert('Could not fully join room. You may have been added—try leaving and rejoining if the room view did not open.')
+      firebase.leaveRoom(state).then(() => showGame(false, dom))
     })
 }
 

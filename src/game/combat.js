@@ -35,9 +35,9 @@ export function computeOutcome(idA, a, idB, b, round) {
   const damageToB = Math.max(0, attackA - shieldB)
   const damageToA = Math.max(0, attackB - shieldA)
 
-  // Clear allocation.regen so the same investment isn't counted again next round
-  const nextAllocA = { ...allocA, regen: 0 }
-  const nextAllocB = { ...allocB, regen: 0 }
+  // Reset allocation so choices (attack/shield/channel/regen) start at zero next round
+  const nextAllocA = { attack: 0, shield: 0, channel: 0, regen: 0 }
+  const nextAllocB = { attack: 0, shield: 0, channel: 0, regen: 0 }
 
   // Mana regen uses previous bonus only (this turn's investment applies from next turn)
   const nextA = {

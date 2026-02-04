@@ -51,9 +51,12 @@ export function updateAllocationUi(alloc, mana, dom) {
   regenBtn1.classList.toggle('ghost', regen !== 7)
   regenBtn2.classList.toggle('ghost', regen !== 12)
 
-  manaLeft.textContent = String(
-    Math.max(0, mana - (alloc.attack + alloc.shield + alloc.channel + regen))
+  const remaining = Math.max(
+    0,
+    mana - (alloc.attack + alloc.shield + alloc.channel + regen)
   )
+  manaLeft.textContent = String(remaining)
+  if (dom.selfMana) dom.selfMana.textContent = String(remaining)
 }
 
 export function renderLog(log, dom) {
@@ -143,11 +146,10 @@ export function renderRoom(roomState, state, dom, constants) {
 
   dom.roomTitle.textContent = `Room: ${roomId}`
   dom.selfHp.textContent = self ? `${self.hp}` : '--'
-  dom.selfMana.textContent = self ? `${self.mana}` : '--'
   dom.selfRegen.textContent = self != null ? String(BASE_REGEN + (self.regenBonus ?? 0)) : '--'
 
   dom.enemyHp.textContent = opponent ? `${opponent.hp}` : '--'
-  dom.enemyMana.textContent = opponent ? `${opponent.mana}` : '--'
+  dom.enemyMana.textContent = opponent ? '?' : '--'
   dom.enemyRegen.textContent = opponent != null ? String(BASE_REGEN + (opponent.regenBonus ?? 0)) : '--'
 
   const allocation = self?.allocation || {
