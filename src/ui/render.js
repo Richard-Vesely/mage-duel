@@ -81,7 +81,7 @@ export function renderRooms(rooms, dom, options = {}) {
       const status = room.status || 'lobby'
       return { id, status, count: players.length }
     })
-    .filter((room) => room.count > 0)
+    .filter((room) => room.count > 0 && room.status !== 'finished')
     .sort((a, b) => a.id.localeCompare(b.id))
 
   if (roomEntries.length === 0) {

@@ -5,10 +5,13 @@ export function computeOutcome(idA, a, idB, b, round) {
   const allocA = sanitizeAllocation(a.allocation || {}, a.mana ?? START_MANA)
   const allocB = sanitizeAllocation(b.allocation || {}, b.mana ?? START_MANA)
 
+  // This round's regen investment (additive for rest of game); applied only when turn is evaluated
   const regenInvestedA = allocA.regen >= 12 ? 2 : allocA.regen >= 7 ? 1 : 0
   const regenInvestedB = allocB.regen >= 12 ? 2 : allocB.regen >= 7 ? 1 : 0
-  const regenBonusA = (a.regenBonus ?? 0) + regenInvestedA
-  const regenBonusB = (b.regenBonus ?? 0) + regenInvestedB
+  const prevRegenBonusA = a.regenBonus ?? 0
+  const prevRegenBonusB = b.regenBonus ?? 0
+  const nextRegenBonusA = prevRegenBonusA + regenInvestedA
+  const nextRegenBonusB = prevRegenBonusB + regenInvestedB
 
   const bonusA = {
     attack: allocA.attack >= 6 ? 2 : 0,
@@ -36,16 +39,17 @@ export function computeOutcome(idA, a, idB, b, round) {
   const nextAllocA = { ...allocA, regen: 0 }
   const nextAllocB = { ...allocB, regen: 0 }
 
+  // Mana regen uses previous bonus only (this turn's investment applies from next turn)
   const nextA = {
     ...a,
     hp: Math.max(0, (a.hp ?? START_HP) - damageToA),
     mana: clamp(
-      (a.mana ?? START_MANA) - allocA.spent + BASE_REGEN + regenBonusA + storedA,
+      (a.mana ?? START_MANA) - allocA.spent + BASE_REGEN + prevRegenBonusA + storedA,
       0,
       a.maxMana ?? MAX_MANA
     ),
     stored: storedA,
-    regenBonus: regenBonusA,
+    regenBonus: nextRegenBonusA,
     allocation: nextAllocA,
   }
 
@@ -53,12 +57,12 @@ export function computeOutcome(idA, a, idB, b, round) {
     ...b,
     hp: Math.max(0, (b.hp ?? START_HP) - damageToB),
     mana: clamp(
-      (b.mana ?? START_MANA) - allocB.spent + BASE_REGEN + regenBonusB + storedB,
+      (b.mana ?? START_MANA) - allocB.spent + BASE_REGEN + prevRegenBonusB + storedB,
       0,
       b.maxMana ?? MAX_MANA
     ),
     stored: storedB,
-    regenBonus: regenBonusB,
+    regenBonus: nextRegenBonusB,
     allocation: nextAllocB,
   }
 
@@ -71,7 +75,7 @@ export function computeOutcome(idA, a, idB, b, round) {
     winnerId = idA
   }
 
-  const summary = `Beam ${attackA} vs ${shieldB} | Aegis ${attackB} vs ${shieldA} | Damage: ${damageToA} / ${damageToB} | Regen +${nextA.regenBonus}/+${nextB.regenBonus}`
+  const summary = `Beam ${attackA} vs ${shieldB} | Aegis ${attackB} vs ${shieldA} | Damage: ${damageToA} / ${damageToB} | Regen +${nextRegenBonusA}/+${nextRegenBonusB}`
 
   return {
     nextA,
