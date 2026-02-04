@@ -39,7 +39,7 @@
         },
         "players": {
           "$uid": {
-            ".write": "$uid === auth.uid"
+            ".write": "$uid === auth.uid || (root.child('rooms/' + $roomId + '/hostUid').val() === auth.uid && root.child('rooms/' + $roomId + '/tick/phase').val() === 'resolving')"
           }
         },
         "spectators": {
