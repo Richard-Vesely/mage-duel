@@ -1,0 +1,53 @@
+{
+  "rules": {
+    "publicRooms": {
+      ".read": "auth != null",
+      ".indexOn": ["updatedAt"],
+      "$roomId": {
+        ".write": "auth != null && (root.child('rooms/' + $roomId + '/players/' + auth.uid).exists() || root.child('rooms/' + $roomId + '/hostUid').val() === auth.uid)"
+      }
+    },
+    "rooms": {
+      "$roomId": {
+        ".read": "auth != null && (data.child('visibility').val() === 'public' || data.child('players').child(auth.uid).exists() || data.child('spectators').child(auth.uid).exists())",
+        "createdAt": {
+          ".write": "!data.exists()"
+        },
+        "hostUid": {
+          ".write": "!data.exists() && auth != null"
+        },
+        "visibility": {
+          ".write": "!data.exists() && auth != null"
+        },
+        "updatedAt": {
+          ".write": "auth != null && (root.child('rooms/' + $roomId + '/players/' + auth.uid).exists() || root.child('rooms/' + $roomId + '/spectators/' + auth.uid).exists() || root.child('rooms/' + $roomId + '/hostUid').val() === auth.uid)"
+        },
+        "status": {
+          ".write": "auth != null && root.child('rooms/' + $roomId + '/hostUid').val() === auth.uid"
+        },
+        "tick": {
+          ".write": "auth != null && root.child('rooms/' + $roomId + '/hostUid').val() === auth.uid"
+        },
+        "log": {
+          ".write": "auth != null && root.child('rooms/' + $roomId + '/hostUid').val() === auth.uid"
+        },
+        "lastRound": {
+          ".write": "auth != null && root.child('rooms/' + $roomId + '/hostUid').val() === auth.uid"
+        },
+        "winner": {
+          ".write": "auth != null && root.child('rooms/' + $roomId + '/hostUid').val() === auth.uid"
+        },
+        "players": {
+          "$uid": {
+            ".write": "$uid === auth.uid"
+          }
+        },
+        "spectators": {
+          "$uid": {
+            ".write": "$uid === auth.uid"
+          }
+        }
+      }
+    }
+  }
+}

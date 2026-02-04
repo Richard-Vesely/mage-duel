@@ -33,10 +33,10 @@ function allocationFromDom(domRef) {
   }
 }
 
-function handleJoinOrSpectate(code, mode) {
+function handleJoinOrSpectate(code, mode, visibility = 'public') {
   const name = dom.playerName.value.trim() || 'Arcane Mage'
   firebase
-    .ensureRoom(code, name, mode, state)
+    .ensureRoom(code, name, mode, state, visibility)
     .then(() => {
       showGame(true, dom)
       firebase.subscribeRoom(state.roomId, (data) => {
@@ -46,11 +46,25 @@ function handleJoinOrSpectate(code, mode) {
     })
 }
 
+function goToMainPage() {
+  if (!dom.gamePanel.classList.contains('hidden')) {
+    firebase.leaveRoom(state).then(() => showGame(false, dom))
+  }
+}
+
 function bindConfigForm() {
   showConfig(false, dom)
   firebase.init(firebaseConfig, state, {
     onAuth() {
       setStatus('Online', 'good', dom)
+      firebase.subscribePublicRooms((publicRooms) =>
+        renderRooms(publicRooms, dom, {
+          onRoomCardAction(code, mode) {
+            dom.roomCode.value = code
+            handleJoinOrSpectate(code, mode)
+          },
+        })
+      )
     },
   })
 }
@@ -77,27 +91,22 @@ function bindLobbyActions() {
     }
     const name = dom.playerName.value.trim() || 'Arcane Mage'
     const code = `arcana-${Math.floor(Math.random() * 999) + 1}`
+    const visibility = dom.privateRoomToggle.checked ? 'private' : 'public'
     dom.roomCode.value = code
-    handleJoinOrSpectate(code, 'player')
+    handleJoinOrSpectate(code, 'player', visibility)
   })
 
   dom.refreshRooms.addEventListener('click', () => {
-    firebase.getRoomsSnapshot()?.then((snapshot) => {
-      if (!snapshot) return
-      renderRooms(snapshot.val() || {}, dom, {
-        onRoomCardAction(code, mode) {
-          dom.roomCode.value = code
-          handleJoinOrSpectate(code, mode)
-        },
-      })
-    })
+    // Refresh is handled automatically by the subscription, but we can force a re-render
+    // by briefly showing a loading state if desired. For now, the realtime subscription
+    // keeps the list up to date automatically.
   })
 }
 
 function bindGameActions() {
   dom.startDuelBtn.addEventListener('click', async () => {
-    if (!state.roomRef) return
-    await firebase.updateRoom(state.roomRef, {
+    if (!state.roomRef || !state.roomId) return
+    await firebase.updateRoom(state.roomId, state.roomRef, {
       status: 'active',
       tick: {
         round: 1,
@@ -177,18 +186,17 @@ function bootstrap() {
     dom.roomCode.value = roomFromUrl
   }
 
+  dom.appTitle.addEventListener('click', goToMainPage)
   bindConfigForm()
   bindLobbyActions()
   bindGameActions()
 
-  firebase.subscribeRooms((rooms) =>
-    renderRooms(rooms, dom, {
-      onRoomCardAction(code, mode) {
-        dom.roomCode.value = code
-        handleJoinOrSpectate(code, mode)
-      },
-    })
-  )
+  renderRooms({}, dom, {
+    onRoomCardAction(code, mode) {
+      dom.roomCode.value = code
+      handleJoinOrSpectate(code, mode)
+    },
+  })
 
   window.setInterval(() => {
     renderTimer(state.roomState, dom)

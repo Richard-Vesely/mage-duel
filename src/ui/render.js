@@ -73,13 +73,15 @@ export function renderLog(log, dom) {
     .join('')
 }
 
-export function renderRooms(rooms, dom, options = {}) {
+export function renderRooms(publicRooms, dom, options = {}) {
   const { onRoomCardAction } = options
-  const roomEntries = Object.entries(rooms || {})
+  const roomEntries = Object.entries(publicRooms || {})
     .map(([id, room]) => {
-      const players = Object.keys(room.players || {})
+      // publicRooms entries have playerCount directly
+      const count = room.playerCount || 0
       const status = room.status || 'lobby'
-      return { id, status, count: players.length }
+      const hostName = room.hostName || null
+      return { id, status, count, hostName }
     })
     .filter((room) => room.count > 0 && room.status !== 'finished')
     .sort((a, b) => a.id.localeCompare(b.id))
@@ -94,10 +96,11 @@ export function renderRooms(rooms, dom, options = {}) {
       const isFull = room.count >= 2
       const label = isFull ? 'Spectate' : 'Join'
       const mode = isFull ? 'spectator' : 'player'
+      const hostInfo = room.hostName ? ` · Host: ${room.hostName}` : ''
       return `<div class="roomCard" data-room="${room.id}" data-mode="${mode}" role="button" tabindex="0">
         <div>
           <div class="roomCode">${room.id}</div>
-          <div class="roomInfo">${room.count} mage${room.count === 1 ? '' : 's'} · ${room.status}</div>
+          <div class="roomInfo">${room.count} mage${room.count === 1 ? '' : 's'} · ${room.status}${hostInfo}</div>
         </div>
         <span class="roomCardLabel">${label}</span>
       </div>`
@@ -120,7 +123,7 @@ export function renderRooms(rooms, dom, options = {}) {
 }
 
 export function renderRoom(roomState, state, dom, constants) {
-  const { START_MANA } = constants
+  const { START_MANA, BASE_REGEN } = constants
   const { user, roomId, isHost, isSpectator } = state
   if (!roomState || !user) return
 
@@ -141,18 +144,11 @@ export function renderRoom(roomState, state, dom, constants) {
   dom.roomTitle.textContent = `Room: ${roomId}`
   dom.selfHp.textContent = self ? `${self.hp}` : '--'
   dom.selfMana.textContent = self ? `${self.mana}` : '--'
-  dom.selfStored.textContent = self ? `${self.stored}` : '--'
-  dom.selfRegen.textContent = self ? `+${self.regenBonus ?? 0}` : '--'
-  dom.selfStatus.textContent = self
-    ? 'Ready'
-    : isSpectator
-      ? 'Spectating'
-      : '--'
+  dom.selfRegen.textContent = self != null ? String(BASE_REGEN + (self.regenBonus ?? 0)) : '--'
 
   dom.enemyHp.textContent = opponent ? `${opponent.hp}` : '--'
   dom.enemyMana.textContent = opponent ? `${opponent.mana}` : '--'
-  dom.enemyStored.textContent = opponent ? `${opponent.stored}` : '--'
-  dom.enemyStatus.textContent = opponent ? 'Engaged' : 'Awaiting Mage'
+  dom.enemyRegen.textContent = opponent != null ? String(BASE_REGEN + (opponent.regenBonus ?? 0)) : '--'
 
   const allocation = self?.allocation || {
     attack: 0,

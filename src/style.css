@@ -52,6 +52,14 @@ body {
   letter-spacing: 1px;
 }
 
+.title h1.clickable {
+  cursor: pointer;
+}
+
+.title h1.clickable:hover {
+  color: var(--accent);
+}
+
 .eyebrow {
   text-transform: uppercase;
   font-size: 12px;
@@ -186,6 +194,36 @@ button.ghost {
   display: none !important;
 }
 
+.roomVisibilityToggle {
+  margin-top: 12px;
+  padding: 12px;
+  background: rgba(6, 10, 22, 0.4);
+  border-radius: 10px;
+  border: 1px solid rgba(82, 225, 255, 0.12);
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 13px;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.checkboxLabel input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: var(--accent);
+}
+
+.checkboxLabel span {
+  user-select: none;
+}
+
 .actions {
   margin-top: 16px;
   display: flex;
@@ -291,11 +329,54 @@ button.ghost {
   font-family: 'Unbounded', 'Segoe UI', system-ui, sans-serif;
 }
 
-.stat {
+.playerStats {
   display: flex;
-  justify-content: space-between;
-  margin: 10px 0;
-  font-size: 14px;
+  gap: 20px;
+  margin-top: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.statCircle {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Unbounded', 'Segoe UI', system-ui, sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  border: 3px solid rgba(255, 255, 255, 0.15);
+  box-shadow: inset 0 0 24px rgba(0, 0, 0, 0.3);
+}
+
+.statCircleLabel {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  opacity: 0.85;
+  margin-bottom: 2px;
+  font-weight: 600;
+}
+
+.statCircleHp {
+  background: linear-gradient(180deg, rgba(255, 92, 92, 0.25), rgba(180, 40, 40, 0.2));
+  border-color: rgba(255, 92, 92, 0.5);
+  color: #ffb3b3;
+}
+
+.statCircleMana {
+  background: linear-gradient(180deg, rgba(82, 225, 255, 0.25), rgba(40, 140, 180, 0.2));
+  border-color: rgba(82, 225, 255, 0.5);
+  color: var(--accent);
+}
+
+.statCircleRegen {
+  background: linear-gradient(180deg, rgba(92, 255, 157, 0.2), rgba(40, 160, 80, 0.2));
+  border-color: rgba(92, 255, 157, 0.45);
+  color: var(--good);
 }
 
 .focus {

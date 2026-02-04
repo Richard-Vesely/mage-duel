@@ -1,5 +1,5 @@
-import { sanitizeAllocation, clamp } from './allocation.js'
-import { START_HP, START_MANA, MAX_MANA, BASE_REGEN } from '../config/constants.js'
+import { sanitizeAllocation } from './allocation.js'
+import { START_HP, START_MANA, BASE_REGEN } from '../config/constants.js'
 
 export function computeOutcome(idA, a, idB, b, round) {
   const allocA = sanitizeAllocation(a.allocation || {}, a.mana ?? START_MANA)
@@ -43,10 +43,9 @@ export function computeOutcome(idA, a, idB, b, round) {
   const nextA = {
     ...a,
     hp: Math.max(0, (a.hp ?? START_HP) - damageToA),
-    mana: clamp(
-      (a.mana ?? START_MANA) - allocA.spent + BASE_REGEN + prevRegenBonusA + storedA,
+    mana: Math.max(
       0,
-      a.maxMana ?? MAX_MANA
+      (a.mana ?? START_MANA) - allocA.spent + BASE_REGEN + prevRegenBonusA + storedA
     ),
     stored: storedA,
     regenBonus: nextRegenBonusA,
@@ -56,10 +55,9 @@ export function computeOutcome(idA, a, idB, b, round) {
   const nextB = {
     ...b,
     hp: Math.max(0, (b.hp ?? START_HP) - damageToB),
-    mana: clamp(
-      (b.mana ?? START_MANA) - allocB.spent + BASE_REGEN + prevRegenBonusB + storedB,
+    mana: Math.max(
       0,
-      b.maxMana ?? MAX_MANA
+      (b.mana ?? START_MANA) - allocB.spent + BASE_REGEN + prevRegenBonusB + storedB
     ),
     stored: storedB,
     regenBonus: nextRegenBonusB,
@@ -75,7 +73,7 @@ export function computeOutcome(idA, a, idB, b, round) {
     winnerId = idA
   }
 
-  const summary = `Beam ${attackA} vs ${shieldB} | Aegis ${attackB} vs ${shieldA} | Damage: ${damageToA} / ${damageToB} | Regen +${nextRegenBonusA}/+${nextRegenBonusB}`
+  const summary = `Attack ${attackA} vs ${shieldB} | Shield ${attackB} vs ${shieldA} | Damage: ${damageToA} / ${damageToB} | Regen +${nextRegenBonusA}/+${nextRegenBonusB}`
 
   return {
     nextA,

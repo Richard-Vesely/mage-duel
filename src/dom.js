@@ -5,6 +5,7 @@ const $ = (selector, root) => root.querySelector(selector)
 export function initDom(root) {
   root.innerHTML = appTemplate
   return {
+    appTitle: $('#appTitle', root),
     statusEl: $('#status', root),
     configPanel: $('#configPanel', root),
     lobbyPanel: $('#lobbyPanel', root),
@@ -24,21 +25,20 @@ export function initDom(root) {
     roomsContainer: $('#roomsContainer', root),
     playerName: $('#playerName', root),
     roomCode: $('#roomCode', root),
+    privateRoomToggle: $('#privateRoomToggle', root),
     joinRoom: $('#joinRoom', root),
     createRoom: $('#createRoom', root),
     refreshRooms: $('#refreshRooms', root),
     leaveRoom: $('#leaveRoom', root),
+    appTitle: $('.title h1', root),
     roomTitle: $('#roomTitle', root),
     roundInfo: $('#roundInfo', root),
     selfHp: $('#selfHp', root),
     selfMana: $('#selfMana', root),
-    selfStored: $('#selfStored', root),
     selfRegen: $('#selfRegen', root),
-    selfStatus: $('#selfStatus', root),
     enemyHp: $('#enemyHp', root),
     enemyMana: $('#enemyMana', root),
-    enemyStored: $('#enemyStored', root),
-    enemyStatus: $('#enemyStatus', root),
+    enemyRegen: $('#enemyRegen', root),
     timer: $('#timer', root),
     logPanel: $('#logPanel', root),
   }

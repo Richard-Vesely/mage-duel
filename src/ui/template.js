@@ -3,7 +3,7 @@ export const appTemplate = `
     <header class="title">
       <div>
         <p class="eyebrow">Neon Arcana</p>
-        <h1>Mage Duel: Mana Weaving</h1>
+        <h1 id="appTitle" class="clickable" title="Back to main">Mage Duel: Mana Weaving</h1>
         <p class="sub">Static combat. Real-time decisions. Invest mana to outplay your rival.</p>
       </div>
       <div class="status" id="status">Offline</div>
@@ -30,6 +30,12 @@ export const appTemplate = `
         <label>Display Name<input id="playerName" placeholder="Nova" /></label>
         <label>Room Code<input id="roomCode" placeholder="arcana-001" /></label>
       </div>
+      <div class="roomVisibilityToggle">
+        <label class="checkboxLabel">
+          <input type="checkbox" id="privateRoomToggle" />
+          <span>Create as private room (join by code only)</span>
+        </label>
+      </div>
       <div class="actions">
         <button id="joinRoom">Join Room</button>
         <button class="ghost" id="createRoom">Create New Room</button>
@@ -55,11 +61,12 @@ export const appTemplate = `
         <div>
           <h3>Akce</h3>
           <ul>
-            <li><strong>Útok (Beam):</strong> Přímé poškození soupeře.</li>
-            <li><strong>Štít (Aegis):</strong> Blokuje protivníkův útok.</li>
-            <li><strong>Kanálování (Surge):</strong> Ulož manu na další kolo.</li>
+            <li><strong>Útok (Attack):</strong> Přímé poškození soupeře.</li>
+            <li><strong>Štít (Shield):</strong> Blokuje protivníkův útok.</li>
+            <li><strong>Kanálování (Channel):</strong> Ulož manu na další kolo.</li>
             <li><strong>Regen:</strong> Invest 7 many = +1 regen navždy, invest 12 many = +2 regen navždy. Investice se sčítají.</li>
           </ul>
+          <p><strong>Bonus:</strong> Investice 6 a více many do Útoku, Štítu nebo Kanálování přidá +2 k hodnotě té akce.</p>
         </div>
         <div>
           <h3>Regenerace many</h3>
@@ -88,19 +95,20 @@ export const appTemplate = `
       <div class="arena">
         <div class="mage" id="selfCard">
           <h3>You</h3>
-          <div class="stat"><span>HP</span><span id="selfHp">--</span></div>
-          <div class="stat"><span>Mana</span><span id="selfMana">--</span></div>
-          <div class="stat"><span>Stored</span><span id="selfStored">--</span></div>
-          <div class="stat"><span>Regen</span><span id="selfRegen">--</span></div>
-          <div class="stat"><span>Status</span><span id="selfStatus">--</span></div>
+          <div class="playerStats">
+            <div class="statCircle statCircleHp"><span class="statCircleLabel">HP</span><span id="selfHp">--</span></div>
+            <div class="statCircle statCircleMana"><span class="statCircleLabel">Mana</span><span id="selfMana">--</span></div>
+            <div class="statCircle statCircleRegen"><span class="statCircleLabel">Regen</span><span id="selfRegen">--</span></div>
+          </div>
         </div>
 
         <div class="focus">
           <div class="timer" id="timer">--</div>
           <div class="sigils">
-            <div class="sigil">Beam</div>
-            <div class="sigil">Aegis</div>
-            <div class="sigil">Surge</div>
+            <div class="sigil">Attack</div>
+            <div class="sigil">Shield</div>
+            <div class="sigil">Channel</div>
+            <div class="sigil">Regen</div>
           </div>
           <div class="allocation" id="allocation">
             <div class="allocationRow">
@@ -134,10 +142,11 @@ export const appTemplate = `
 
         <div class="mage" id="enemyCard">
           <h3>Opponent</h3>
-          <div class="stat"><span>HP</span><span id="enemyHp">--</span></div>
-          <div class="stat"><span>Mana</span><span id="enemyMana">--</span></div>
-          <div class="stat"><span>Stored</span><span id="enemyStored">--</span></div>
-          <div class="stat"><span>Status</span><span id="enemyStatus">--</span></div>
+          <div class="playerStats">
+            <div class="statCircle statCircleHp"><span class="statCircleLabel">HP</span><span id="enemyHp">--</span></div>
+            <div class="statCircle statCircleMana"><span class="statCircleLabel">Mana</span><span id="enemyMana">--</span></div>
+            <div class="statCircle statCircleRegen"><span class="statCircleLabel">Regen</span><span id="enemyRegen">--</span></div>
+          </div>
         </div>
       </div>
 
