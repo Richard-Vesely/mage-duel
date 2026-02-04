@@ -42,6 +42,9 @@ function handleJoinOrSpectate(code, mode, visibility = 'public') {
         firebase.subscribeRoom(state.roomId, (data) => {
           state.roomState = data
           renderRoom(state.roomState, state, dom, constants)
+          if (state.roomId) {
+            firebase.syncPublicRoomIndex(state.roomId).catch(() => {})
+          }
         })
       },
     })
@@ -63,14 +66,15 @@ function bindConfigForm() {
   firebase.init(firebaseConfig, state, {
     onAuth() {
       setStatus('Online', 'good', dom)
-      firebase.subscribePublicRooms((publicRooms) =>
+      firebase.subscribePublicRooms((publicRooms) => {
         renderRooms(publicRooms, dom, {
           onRoomCardAction(code, mode) {
             dom.roomCode.value = code
             handleJoinOrSpectate(code, mode)
           },
         })
-      )
+        firebase.cleanupEmptyPublicRooms(publicRooms)
+      })
     },
   })
 }

@@ -94,7 +94,7 @@ export const appTemplate = `
 
       <div class="arena">
         <div class="mage" id="selfCard">
-          <h3>You</h3>
+          <h3 id="selfCardTitle">You</h3>
           <div class="playerStats">
             <div class="statCircle statCircleHp"><span class="statCircleLabel">HP</span><span id="selfHp">--</span></div>
             <div class="statCircle statCircleMana"><span class="statCircleLabel">Mana</span><span id="selfMana">--</span></div>
@@ -141,7 +141,7 @@ export const appTemplate = `
         </div>
 
         <div class="mage" id="enemyCard">
-          <h3>Opponent</h3>
+          <h3 id="enemyCardTitle">Opponent</h3>
           <div class="playerStats">
             <div class="statCircle statCircleHp"><span class="statCircleLabel">HP</span><span id="enemyHp">--</span></div>
             <div class="statCircle statCircleMana"><span class="statCircleLabel">Mana</span><span id="enemyMana">--</span></div>
@@ -150,6 +150,9 @@ export const appTemplate = `
         </div>
       </div>
 
+      <div id="lastRoundPanel" class="lastRound hidden">
+        <div id="lastRoundContent"></div>
+      </div>
       <div class="log" id="logPanel"></div>
     </section>
   </div>

@@ -12,6 +12,7 @@ export function initDom(root) {
     gamePanel: $('#gamePanel', root),
     roomMeta: $('#roomMeta', root),
     startDuelBtn: $('#startDuel', root),
+    allocationPanel: $('#allocation', root),
     attackRange: $('#attackRange', root),
     shieldRange: $('#shieldRange', root),
     channelRange: $('#channelRange', root),
@@ -41,5 +42,9 @@ export function initDom(root) {
     enemyRegen: $('#enemyRegen', root),
     timer: $('#timer', root),
     logPanel: $('#logPanel', root),
+    selfCardTitle: $('#selfCardTitle', root),
+    enemyCardTitle: $('#enemyCardTitle', root),
+    lastRoundPanel: $('#lastRoundPanel', root),
+    lastRoundContent: $('#lastRoundContent', root),
   }
 }

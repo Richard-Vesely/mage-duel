@@ -172,7 +172,38 @@ export function subscribePublicRooms(callback) {
   onValue(publicRoomsQuery, (snapshot) => callback(snapshot.val() || {}))
 }
 
-async function syncPublicRoomIndex(roomId) {
+let cleanupEmptyRoomsTimeout = null
+const CLEANUP_DEBOUNCE_MS = 2500
+
+export function cleanupEmptyPublicRooms(publicRooms) {
+  if (!db || !publicRooms || typeof publicRooms !== 'object') return
+  const roomIds = Object.keys(publicRooms)
+  if (roomIds.length === 0) return
+
+  if (cleanupEmptyRoomsTimeout) clearTimeout(cleanupEmptyRoomsTimeout)
+  cleanupEmptyRoomsTimeout = setTimeout(async () => {
+    cleanupEmptyRoomsTimeout = null
+    for (const roomId of roomIds) {
+      try {
+        const roomRef = ref(db, `rooms/${roomId}`)
+        const snapshot = await get(roomRef)
+        const room = snapshot.val()
+        if (!room) continue
+        const players = room.players || {}
+        const spectators = room.spectators || {}
+        if (Object.keys(players).length === 0 && Object.keys(spectators).length === 0) {
+          const publicRoomRef = ref(db, `publicRooms/${roomId}`)
+          await remove(publicRoomRef)
+        }
+      } catch (e) {
+        // best effort; skip room on read/write errors (e.g. private room)
+      }
+      await new Promise((r) => setTimeout(r, 80))
+    }
+  }, CLEANUP_DEBOUNCE_MS)
+}
+
+export async function syncPublicRoomIndex(roomId) {
   const roomRef = ref(db, `rooms/${roomId}`)
   const snapshot = await get(roomRef)
   const room = snapshot.val()

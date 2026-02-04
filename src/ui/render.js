@@ -145,27 +145,48 @@ export function renderRoom(roomState, state, dom, constants) {
   dom.roomMeta.textContent = `Players: ${playerIds.length} | Host: ${players[hostId]?.name || '---'}`
 
   dom.roomTitle.textContent = `Room: ${roomId}`
-  dom.selfHp.textContent = self ? `${self.hp}` : '--'
-  dom.selfRegen.textContent = self != null ? String(BASE_REGEN + (self.regenBonus ?? 0)) : '--'
 
-  dom.enemyHp.textContent = opponent ? `${opponent.hp}` : '--'
-  dom.enemyMana.textContent = opponent ? '?' : '--'
-  dom.enemyRegen.textContent = opponent != null ? String(BASE_REGEN + (opponent.regenBonus ?? 0)) : '--'
-
-  const allocation = self?.allocation || {
-    attack: 0,
-    shield: 0,
-    channel: 0,
-    regen: 0,
-  }
-  updateAllocationUi(allocation, self?.mana ?? START_MANA, dom)
-  const canAct = Boolean(self)
-  dom.attackRange.disabled = !canAct
-  dom.shieldRange.disabled = !canAct
-  dom.channelRange.disabled = !canAct
-  if (!canAct) {
+  if (isSpectator) {
+    const player1 = sortedIds[0] != null ? players[sortedIds[0]] : null
+    const player2 = sortedIds[1] != null ? players[sortedIds[1]] : null
+    dom.selfCardTitle.textContent = player1?.name || 'Mage 1'
+    dom.enemyCardTitle.textContent = player2?.name || 'Mage 2'
+    dom.selfHp.textContent = player1 != null ? String(player1.hp) : '--'
+    dom.selfMana.textContent = player1 != null ? String(player1.mana ?? START_MANA) : '--'
+    dom.selfRegen.textContent = player1 != null ? String(BASE_REGEN + (player1.regenBonus ?? 0)) : '--'
+    dom.enemyHp.textContent = player2 != null ? String(player2.hp) : '--'
+    dom.enemyMana.textContent = player2 != null ? String(player2.mana ?? START_MANA) : '--'
+    dom.enemyRegen.textContent = player2 != null ? String(BASE_REGEN + (player2.regenBonus ?? 0)) : '--'
+    if (dom.allocationPanel) dom.allocationPanel.classList.add('hidden')
+    dom.attackRange.disabled = true
+    dom.shieldRange.disabled = true
+    dom.channelRange.disabled = true
     dom.regenBtn1.disabled = true
     dom.regenBtn2.disabled = true
+  } else {
+    dom.selfCardTitle.textContent = 'You'
+    dom.enemyCardTitle.textContent = 'Opponent'
+    dom.selfHp.textContent = self ? `${self.hp}` : '--'
+    dom.selfRegen.textContent = self != null ? String(BASE_REGEN + (self.regenBonus ?? 0)) : '--'
+    dom.enemyHp.textContent = opponent ? `${opponent.hp}` : '--'
+    dom.enemyMana.textContent = opponent ? '?' : '--'
+    dom.enemyRegen.textContent = opponent != null ? String(BASE_REGEN + (opponent.regenBonus ?? 0)) : '--'
+    if (dom.allocationPanel) dom.allocationPanel.classList.remove('hidden')
+    const allocation = self?.allocation || {
+      attack: 0,
+      shield: 0,
+      channel: 0,
+      regen: 0,
+    }
+    updateAllocationUi(allocation, self?.mana ?? START_MANA, dom)
+    const canAct = Boolean(self)
+    dom.attackRange.disabled = !canAct
+    dom.shieldRange.disabled = !canAct
+    dom.channelRange.disabled = !canAct
+    if (!canAct) {
+      dom.regenBtn1.disabled = true
+      dom.regenBtn2.disabled = true
+    }
   }
 
   dom.startDuelBtn.classList.toggle(
@@ -188,6 +209,28 @@ export function renderRoom(roomState, state, dom, constants) {
   }
 
   renderLog(roomState.log || {}, dom)
+
+  if (isSpectator && dom.lastRoundPanel && dom.lastRoundContent) {
+    const lastRound = roomState.lastRound
+    if (lastRound) {
+      dom.lastRoundPanel.classList.remove('hidden')
+      const damage = lastRound.damage || {}
+      const damageLine = lastRound.round != null
+        ? `Damage: Mage 1 -${damage.toA ?? 0} | Mage 2 -${damage.toB ?? 0}`
+        : ''
+      dom.lastRoundContent.innerHTML = `
+        <div class="logTitle">Last round (${lastRound.round ?? '—'})</div>
+        <div class="logDetail">${lastRound.summary ?? ''}</div>
+        ${damageLine ? `<div class="logDetail">${damageLine}</div>` : ''}
+      `
+    } else {
+      dom.lastRoundPanel.classList.add('hidden')
+      dom.lastRoundContent.innerHTML = ''
+    }
+  } else {
+    if (dom.lastRoundPanel) dom.lastRoundPanel.classList.add('hidden')
+    if (dom.lastRoundContent) dom.lastRoundContent.innerHTML = ''
+  }
 }
 
 export function renderTimer(roomState, dom) {

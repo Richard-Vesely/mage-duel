@@ -461,6 +461,27 @@ button.ghost {
   flex-wrap: wrap;
 }
 
+.lastRound {
+  margin-top: 12px;
+  background: rgba(6, 10, 22, 0.6);
+  border-radius: 12px;
+  padding: 12px 16px;
+  border: 1px solid rgba(82, 225, 255, 0.2);
+}
+
+.lastRound .logTitle {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.lastRound .logDetail {
+  margin-bottom: 4px;
+}
+
+.lastRound .logDetail:last-child {
+  margin-bottom: 0;
+}
+
 .log {
   margin-top: 18px;
   display: grid;

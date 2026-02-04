@@ -4,7 +4,7 @@
       ".read": "auth != null",
       ".indexOn": ["updatedAt"],
       "$roomId": {
-        ".write": "auth != null && (root.child('rooms/' + $roomId + '/players/' + auth.uid).exists() || root.child('rooms/' + $roomId + '/spectators/' + auth.uid).exists() || root.child('rooms/' + $roomId + '/hostUid').val() === auth.uid)"
+        ".write": "auth != null && (root.child('rooms/' + $roomId + '/players/' + auth.uid).exists() || root.child('rooms/' + $roomId + '/spectators/' + auth.uid).exists() || root.child('rooms/' + $roomId + '/hostUid').val() === auth.uid || (!newData.exists() && !root.child('rooms/' + $roomId + '/players').hasChildren() && !root.child('rooms/' + $roomId + '/spectators').hasChildren()))"
       }
     },
     "rooms": {
